@@ -48,7 +48,7 @@ enum WireCommand: Codable, Equatable {
   case moveFast(offsetY: Int)
   case done
   enum CodingKeys: String, CodingKey {
-    case moveFast = "fastMove"
+    case moveFast = "fast_move"
     case done
   }
   enum MoveFastCodingKeys: String, CodingKey { case offsetY = "distanceY" }
@@ -59,6 +59,18 @@ struct EscapedKey: Codable {
   var value: String
   enum CodingKeys: String, CodingKey { case value = "wire\n" }
 }
+
+@Schemable
+struct ContactDetails: Codable { var customerID: Int = 7 }
+
+@Schemable(keyStrategy: .snakeCase)
+struct NestedContact: Codable { var details: ContactDetails = ContactDetails() }
+
+@Schemable
+enum Mode { case minimal }
+
+@Schemable
+struct Settings { var mode: Mode = .minimal }
 
 @Suite struct SchemaConstruction {
   @Test func validatesBeforeExtraction() throws {
@@ -91,6 +103,15 @@ struct EscapedKey: Codable {
     #expect(try Renamed.decode(from: ["wire": "text"]).value == "text")
     #expect(try EscapedKey.decode(from: ["wire\n": "text"]).value == "text")
     #expect(try !Renamed.compile().validate(["value": "text"]).valid)
+    let encoded = try JSONValueEncoder(keyStrategy: NestedContact.schemaKeyStrategy).encode(
+      NestedContact())
+    #expect(encoded["details"]?["customer_id"] == 7)
+    #expect(try NestedContact.decode(from: encoded).details.customerID == 7)
+    let nested = try JSONPointer(NestedContact.schema["$ref"]!.stringValue!).resolve(
+      in: NestedContact.schema)
+    #expect(nested["properties"]?["details"]?["default"] == ["customer_id": 7])
+    #expect(try ContactDetails.compile().validate(["customerID": 7]).valid)
+    #expect(try Settings.compile().validate(["mode": ["minimal": [:]]]).valid)
   }
 
   @Test func enumWireShapesAndRecursion() throws {

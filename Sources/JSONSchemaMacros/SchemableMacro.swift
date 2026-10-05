@@ -127,12 +127,12 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
           }
           if let initializer = binding.initializer {
             statements.append(
-              "\(temporary)[\"default\"] = SchemaMetadata.defaultValue(\(initializer.value.trimmedDescription) as \(typeText))"
+              "\(temporary)[\"default\"] = SchemaMetadata.defaultValue(\(initializer.value.trimmedDescription) as \(typeText), keyStrategy: context.keyStrategy)"
             )
           }
           let wireName =
             keys == nil ? literal(name) : "CodingKeys.\(identifier.identifier.text).stringValue"
-          let key = "SchemaMetadata.key(\(wireName), strategy: \(strategy))"
+          let key = "SchemaMetadata.key(\(wireName), strategy: context.keyStrategy)"
           statements.append("properties[\(key)] = \(temporary)")
           if !isOptional(type) { statements.append("required.append(.string(\(key)))") }
         }
@@ -199,7 +199,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
                 if let payloadKeys, !payloadKeys.contains(name) { continue }
                 let wireName =
                   payloadKeys == nil ? literal(name) : "\(payloadKeysName).\(name).stringValue"
-                let key = "SchemaMetadata.key(\(wireName), strategy: \(strategy))"
+                let key = "SchemaMetadata.key(\(wireName), strategy: context.keyStrategy)"
                 statements.append(
                   "\(temporary)Properties[\(key)] = context.reference(\(parameter.type.trimmedDescription).self)"
                 )
@@ -213,7 +213,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
             )
             let wireName =
               keys == nil ? literal(caseName) : "CodingKeys.\(element.name.text).stringValue"
-            let name = "SchemaMetadata.key(\(wireName), strategy: \(strategy))"
+            let name = "SchemaMetadata.key(\(wireName), strategy: context.keyStrategy)"
             let caseAnnotations = annotations(cases.attributes, trivia: cases.leadingTrivia)
             statements.append(
               "\(caseAnnotations.isEmpty ? "let" : "var") \(temporary)Definition: JSONValue = [\"type\": \"object\", \"properties\": .object(JSONObject([(\(name), \(temporary)Payload)])), \"required\": .array([.string(\(name))]), \"additionalProperties\": false]"

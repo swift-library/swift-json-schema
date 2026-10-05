@@ -12,7 +12,9 @@ public protocol Schemable {
 /// Definition collection inserts a placeholder before traversing recursive types.
 public struct SchemaContext {
   public private(set) var definitions = JSONObject()
-  public init() {}
+  /// A single key strategy applies throughout a generated document.
+  public let keyStrategy: JSONKeyStrategy
+  public init(keyStrategy: JSONKeyStrategy = .identity) { self.keyStrategy = keyStrategy }
   public mutating func reference<T: Schemable>(_ type: T.Type) -> JSONValue {
     let name = String(reflecting: type)
     if definitions[name] == nil {
@@ -33,7 +35,7 @@ public struct SchemaContext {
 extension Schemable {
   public static var schemaKeyStrategy: JSONKeyStrategy { .identity }
   public static var schema: JSONValue {
-    var context = SchemaContext()
+    var context = SchemaContext(keyStrategy: schemaKeyStrategy)
     return context.document(Self.self)
   }
   public static func compile() throws -> CompiledSchema { try SchemaCompiler().compile(schema) }
@@ -61,8 +63,11 @@ public enum SchemaMetadata {
   }
   public static func integer(_ value: Int?) -> JSONValue? { value.map { .number(JSONNumber($0)) } }
   /// An unrepresentable default is omitted from annotations.
-  public static func defaultValue<T: Encodable>(_ value: T) -> JSONValue? {
-    try? JSONValueEncoder().encode(value)
+  public static func defaultValue<T>(
+    _ value: T, keyStrategy: JSONKeyStrategy = .identity
+  ) -> JSONValue? {
+    guard let encodable = value as? any Encodable else { return nil }
+    return try? JSONValueEncoder(keyStrategy: keyStrategy).encode(encodable)
   }
 }
 

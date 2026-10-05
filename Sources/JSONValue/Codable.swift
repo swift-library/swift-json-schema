@@ -318,7 +318,9 @@ private struct DecodingKeys<Key: CodingKey>: KeyedDecodingContainerProtocol {
   let decoder: ValueDecoding
   let map: JSONObject
   var codingPath: [any CodingKey] { decoder.codingPath }
-  var allKeys: [Key] { map.keys.compactMap { Key(stringValue: decoder.strategy.sourceKey($0)) } }
+  var allKeys: [Key] {
+    map.keys.compactMap { Key(stringValue: $0) ?? Key(stringValue: decoder.strategy.sourceKey($0)) }
+  }
   func contains(_ key: Key) -> Bool { map[decoder.strategy.key(key.stringValue)] != nil }
   func slot(_ key: Key) throws -> ValueDecoding {
     guard let value = map[decoder.strategy.key(key.stringValue)] else {
