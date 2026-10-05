@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0 WITH Swift-exception
+# Copyright (c) 2026 Xudong Xu
+
+"""Compile and run the DocC examples from a package consumer."""
+
+import json
+from pathlib import Path
+import shutil
+import subprocess
+
+root = Path(__file__).resolve().parent.parent
+destination = root / ".build/example-consumer"
+source = destination / "Sources/Examples"
+source.mkdir(parents=True, exist_ok=True)
+modules = json.loads((root / ".github/release.json").read_text())["documentation_targets"]
+products = ", ".join('.product(name: ' + json.dumps(m) + ', package: "swift-json-schema")' for m in modules)
+(destination / "Package.swift").write_text('// swift-tools-version: 6.2\nimport PackageDescription\nlet package = Package(name: "Examples", platforms: [.macOS(.v15)], dependencies: [.package(path: ' + json.dumps(str(root)) + ')], targets: [.executableTarget(name: "Examples", dependencies: [' + products + '])])\n')
+for module in modules:
+    for example in (root / "Sources" / module / (module + ".docc/Resources")).glob("*.swift"):
+        shutil.copy2(example, source / example.name)
+(source / "Main.swift").write_text('@main enum Examples { static func main() throws { try exactJSONExample(); try validationExample(); try builderExample(); try foundationExample(); try generationExample() } }\n')
+subprocess.run(["swift", "run", "--package-path", str(destination), "-c", "release", "Examples"], cwd=root, check=True)
+print("DocC consumer examples passed")

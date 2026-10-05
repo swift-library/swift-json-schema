@@ -1,0 +1,70 @@
+#!/bin/bash
+# SPDX-License-Identifier: Apache-2.0 WITH Swift-exception
+# Copyright (c) 2026 Xudong Xu
+set -euo pipefail
+cd "$(dirname "$0")/.."
+case "${1:-all}" in
+  all) export RELEASE_CHECK_SCOPE=all ;;
+  --format-check) export RELEASE_CHECK_SCOPE=format ;;
+  --compiler-check) export RELEASE_CHECK_SCOPE=compiler ;;
+  *) echo 'Usage: Scripts/check [--format-check|--compiler-check]' >&2; exit 2 ;;
+esac
+mkdir -p .build/release-validation
+Scripts/validate-version --json > .build/release-validation/version.json
+swift package dump-package > .build/release-validation/package.json
+python3 - <<'PY'
+import json, pathlib
+config = json.loads(pathlib.Path('.github/release.json').read_text())
+package = json.loads(pathlib.Path('.build/release-validation/package.json').read_text())
+platforms = {p['platformName'].lower(): p['version'] for p in package['platforms']}
+for name, generations in config['platforms'].items():
+    if platforms.get(name.lower()) != str(min(generations)) + '.0':
+        raise SystemExit('Deployment minimum differs from the declared support window: ' + name)
+if package['toolsVersion']['_version'] != config['minimum_swift'] + '.0':
+    raise SystemExit('Swift tools minimum differs from the compiler policy')
+PY
+if [ "$RELEASE_CHECK_SCOPE" = all ] || [ "$RELEASE_CHECK_SCOPE" = format ]; then
+  if [ "$(uname -s)" = Darwin ]; then
+    xcrun swift-format lint --strict --configuration .swift-format --recursive Package.swift Sources Tests Plugins Benchmarks/Package.swift Benchmarks/Sources
+  else
+    swift-format lint --strict --configuration .swift-format --recursive Package.swift Sources Tests Plugins Benchmarks/Package.swift Benchmarks/Sources
+  fi
+fi
+if [ "$RELEASE_CHECK_SCOPE" = all ] || [ "$RELEASE_CHECK_SCOPE" = compiler ]; then
+  python3 -B -m unittest discover -s Tests/ReleaseTools
+  swift test --force-resolved-versions
+  swift build -c release --force-resolved-versions
+  schema_binary_dir=$(swift build -c release --show-bin-path)
+  JSON_SCHEMA_CLI="$schema_binary_dir/json-schema" python3 -B -m unittest discover -s Tests/CLITests
+  Scripts/check-consumer
+  if [ "$(uname -s)" = Darwin ]; then
+    Scripts/check-docs
+  fi
+  mkdir -p .build/release-validation/compliance
+  cp .build/compliance/*.json .build/release-validation/compliance/
+fi
+python3 - <<'PY'
+import hashlib, json, os, pathlib, platform, subprocess
+root = pathlib.Path('.build/release-validation')
+result = json.loads((root / 'version.json').read_text())
+result['os'] = platform.platform()
+result['swift'] = subprocess.check_output(['swift', '--version'], text=True).strip()
+if platform.system() == 'Darwin':
+    result['xcode'] = subprocess.check_output(['xcodebuild', '-version'], text=True).strip()
+    result['sdk'] = subprocess.check_output(['xcrun', '--sdk', 'macosx', '--show-sdk-version'], text=True).strip()
+result['validation_script_sha256'] = hashlib.sha256(pathlib.Path('Scripts/check').read_bytes()).hexdigest()
+result['format_configuration_sha256'] = hashlib.sha256(pathlib.Path('.swift-format').read_bytes()).hexdigest()
+result['checks'] = ['version', 'manifest-requirements']
+scope = os.environ['RELEASE_CHECK_SCOPE']
+if scope in ('all', 'format'):
+    result['checks'] += ['strict-format']
+    command = ['xcrun', 'swift-format', '--version'] if platform.system() == 'Darwin' else ['swift-format', '--version']
+    result['formatter'] = subprocess.check_output(command, text=True).strip()
+if scope in ('all', 'compiler'):
+    result['checks'] += ['release-tools', 'swift-test', 'release-build', 'cli', 'consumer-examples']
+    if platform.system() == 'Darwin':
+        result['checks'] += ['docc-warnings-as-errors']
+        result['documentation'] = json.loads((root / 'documentation.json').read_text())
+(root / 'provenance.json').write_text(json.dumps(result, indent=2) + '\n')
+print('Package checks passed')
+PY

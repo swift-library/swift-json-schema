@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0 WITH Swift-exception
+# Copyright (c) 2026 Xudong Xu
+
+"""Build each public DocC catalog with warnings treated as errors."""
+
+import hashlib
+import json
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import tarfile
+import tempfile
+
+root = Path(__file__).resolve().parent.parent
+output = root / ".build/release-validation"
+output.mkdir(parents=True, exist_ok=True)
+result = subprocess.run(["swift", "package", "--force-resolved-versions", "dump-symbol-graph"], cwd=root, capture_output=True, text=True)
+(output / "docc-symbolgraph.log").write_text(result.stdout + result.stderr)
+result.check_returncode()
+directories = re.findall(r"Files written to (.+)", result.stdout + result.stderr)
+if len(directories) != 1:
+    raise RuntimeError("Symbol extraction must identify one directory")
+graphs = Path(directories[0].strip())
+workspace = root / ".build/documentation"
+workspace.mkdir(parents=True, exist_ok=True)
+modules = json.loads((root / ".github/release.json").read_text())["documentation_targets"]
+evidence = {}
+for module in modules:
+    symbols = Path(tempfile.mkdtemp(prefix=module + "-", dir=workspace))
+    selected = [graphs / (module + ".symbols.json"), *graphs.glob(module + "@*.symbols.json")]
+    for path in selected:
+        shutil.copy2(path, symbols / path.name)
+    archive = workspace / (module + ".doccarchive")
+    with (output / (module + "-docc.log")).open("w") as log:
+        subprocess.run(["xcrun", "docc", "convert", str(root / "Sources" / module / (module + ".docc")), "--additional-symbol-graph-dir", str(symbols), "--output-path", str(archive), "--warnings-as-errors"], cwd=root, stdout=log, stderr=subprocess.STDOUT, check=True)
+    compressed = output / (module + ".doccarchive.tar.gz")
+    with tarfile.open(compressed, "w:gz") as bundle:
+        bundle.add(archive, arcname=archive.name)
+    evidence[module] = {"archive_sha256": hashlib.sha256(compressed.read_bytes()).hexdigest(), "symbol_graphs": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in selected}}
+(output / "documentation.json").write_text(json.dumps(evidence, indent=2) + "\n")
+print("DocC warnings-as-errors passed for " + ", ".join(modules))

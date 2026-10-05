@@ -1,0 +1,13 @@
+@Tutorial(time: 5) {
+  @Intro(title: "Validate JSON") {
+    Parse a schema once and reuse its validator.
+  }
+  @Section(title: "Compile and validate") {
+    @Steps {
+      @Step {
+        Create a schema, compile it, and inspect the flag output.
+        @Code(name: "Validate.swift", file: "Validate.swift")
+      }
+    }
+  }
+}

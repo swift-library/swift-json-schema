@@ -1,0 +1,12 @@
+#!/bin/bash
+# SPDX-License-Identifier: Apache-2.0 WITH Swift-exception
+# Copyright (c) 2026 Xudong Xu
+set -euo pipefail
+cd "$(dirname "$0")/.."
+schema_image=$(python3 -c 'import json; print(json.load(open(".github/release.json"))["linux_image"])')
+docker run --rm -v "$PWD:/package" -w /package "$schema_image" bash -euo pipefail -c '
+  apt-get update -qq
+  apt-get install -y -qq python3 git
+  git config --global --add safe.directory /package
+  Scripts/check --compiler-check
+'

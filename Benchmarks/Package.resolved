@@ -1,0 +1,33 @@
+{
+  "originHash" : "c4760dbf08fa33fcea1ec4bd186b3c927cf24e7db679f0397cef2070f981e318",
+  "pins" : [
+    {
+      "identity" : "swift-benchmark",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swift-library/swift-benchmark.git",
+      "state" : {
+        "revision" : "6be2ae39d6f5e46799ee3a6f8669c6bd16954534",
+        "version" : "0.1.2"
+      }
+    },
+    {
+      "identity" : "swift-collections",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-collections.git",
+      "state" : {
+        "revision" : "98ef3c98609a1e31b7e157b5b619579001a789d6",
+        "version" : "1.7.1"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-syntax.git",
+      "state" : {
+        "revision" : "4799286537280063c85a32f09884cfbca301b1a1",
+        "version" : "602.0.0"
+      }
+    }
+  ],
+  "version" : 3
+}

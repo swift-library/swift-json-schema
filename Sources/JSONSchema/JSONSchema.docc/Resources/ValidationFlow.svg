@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="120" viewBox="0 0 600 120">
+  <title>JSON validation flow</title>
+  <rect width="600" height="120" fill="#fff"/>
+  <g fill="#f3f4f6" stroke="#374151" stroke-width="2">
+    <rect x="20" y="30" width="160" height="60" rx="8"/>
+    <rect x="220" y="30" width="160" height="60" rx="8"/>
+    <rect x="420" y="30" width="160" height="60" rx="8"/>
+  </g>
+  <g fill="#111827" font-family="monospace" font-size="16" text-anchor="middle">
+    <text x="100" y="66">Compile schema</text>
+    <text x="300" y="66">Validate JSON</text>
+    <text x="500" y="66">Inspect result</text>
+  </g>
+  <g stroke="#374151" stroke-width="2" fill="none">
+    <path d="M180 60H210M202 54L210 60L202 66"/>
+    <path d="M380 60H410M402 54L410 60L402 66"/>
+  </g>
+</svg>

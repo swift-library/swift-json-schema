@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0 WITH Swift-exception
+# Copyright (c) 2026 Xudong Xu
+import json
+from pathlib import Path
+import sys
+
+version = Path(sys.argv[1]).read_text().strip()
+Path(sys.argv[2]).write_text(
+    '// SPDX-License-Identifier: Apache-2.0 WITH Swift-exception\n'
+    '// Copyright (c) 2026 Xudong Xu\n'
+    'enum PackageVersion { static let value = ' + json.dumps(version) + ' }\n'
+)

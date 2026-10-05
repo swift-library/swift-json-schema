@@ -1,0 +1,9 @@
+@Tutorials(name: "JSON validation") {
+  @Intro(title: "JSON validation") {
+    Compile a schema and validate a value.
+  }
+  @Chapter(name: "Getting started") {
+    @Image(source: "ValidationFlow.svg", alt: "Compile a schema, validate a JSON value, and inspect the result.")
+    @TutorialReference(tutorial: "doc:Validate")
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "Tests/JSONSchemaTests/JSONSchemaTestSuite": {
+    "repository": "https://github.com/json-schema-org/JSON-Schema-Test-Suite",
+    "revision": "5b0ee1613e45fcc2bddac00e07c19cd49b00d8a8",
+    "archive_sha256": "baf7510ec75fb87311b8272cd04bab51459449f7c5f12befdc55a41ec19de8bf"
+  },
+  "Tests/JSONValueTests/JSONTestSuite": {
+    "repository": "https://github.com/nst/JSONTestSuite",
+    "revision": "1ef36fa01286573e846ac449e8683f8833c5b26a",
+    "archive_sha256": "32ab2fb37cc26679dbd9164dbb7053bcef10134643d53cb0cef45de7680dcdcc"
+  }
+}
