@@ -11,13 +11,12 @@ import re
 import shutil
 import subprocess
 import tarfile
-import tempfile
 
 root = Path(__file__).resolve().parent.parent
 output = root / ".build/release-validation"
 output.mkdir(parents=True, exist_ok=True)
 result = subprocess.run(["swift", "package", "--force-resolved-versions", "dump-symbol-graph"], cwd=root, capture_output=True, text=True)
-(output / "docc-symbolgraph.log").write_text(result.stdout + result.stderr)
+(output / "docc-symbolgraph.log").write_text((result.stdout + result.stderr).replace(str(root), "<package>"))
 result.check_returncode()
 directories = re.findall(r"Files written to (.+)", result.stdout + result.stderr)
 if len(directories) != 1:
@@ -28,13 +27,20 @@ workspace.mkdir(parents=True, exist_ok=True)
 modules = json.loads((root / ".github/release.json").read_text())["documentation_targets"]
 evidence = {}
 for module in modules:
-    symbols = Path(tempfile.mkdtemp(prefix=module + "-", dir=workspace))
+    symbols = workspace / "symbols" / module
+    if symbols.exists():
+        shutil.rmtree(symbols)
+    symbols.mkdir(parents=True)
     selected = [graphs / (module + ".symbols.json"), *graphs.glob(module + "@*.symbols.json")]
     for path in selected:
         shutil.copy2(path, symbols / path.name)
     archive = workspace / (module + ".doccarchive")
-    with (output / (module + "-docc.log")).open("w") as log:
-        subprocess.run(["xcrun", "docc", "convert", str(root / "Sources" / module / (module + ".docc")), "--additional-symbol-graph-dir", str(symbols), "--output-path", str(archive), "--warnings-as-errors"], cwd=root, stdout=log, stderr=subprocess.STDOUT, check=True)
+    try:
+        result = subprocess.run(["xcrun", "docc", "convert", str(root / "Sources" / module / (module + ".docc")), "--additional-symbol-graph-dir", str(symbols), "--output-path", str(archive), "--warnings-as-errors"], cwd=root, capture_output=True, text=True)
+        (output / (module + "-docc.log")).write_text((result.stdout + result.stderr).replace(str(root), "<package>"))
+        result.check_returncode()
+    finally:
+        shutil.rmtree(symbols)
     compressed = output / (module + ".doccarchive.tar.gz")
     with tarfile.open(compressed, "w:gz") as bundle:
         bundle.add(archive, arcname=archive.name)

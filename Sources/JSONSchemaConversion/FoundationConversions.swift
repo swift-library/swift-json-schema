@@ -6,7 +6,10 @@ import JSONSchema
 import JSONSchemaBuilder
 import JSONValue
 
+/// Typed schema components that validate and then extract Foundation values.
+/// Extraction checks remain active even when format assertions are disabled.
 public enum FoundationSchema {
+  /// Extracts an absolute URI as `URL`; invalid or relative URI text throws.
   public static var url: SchemaComponent<URL> {
     Schema.string().format("uri").map { text in
       guard FormatValidation.matches(text, format: "uri"), let url = URL(string: text) else {
@@ -15,6 +18,7 @@ public enum FoundationSchema {
       return url
     }
   }
+  /// Extracts a UUID string accepted by both format validation and Foundation.
   public static var uuid: SchemaComponent<UUID> {
     Schema.string().format("uuid").map { text in
       guard FormatValidation.matches(text, format: "uuid"), let uuid = UUID(uuidString: text) else {
@@ -23,6 +27,7 @@ public enum FoundationSchema {
       return uuid
     }
   }
+  /// Extracts an RFC 3339 timestamp representable by `Date`, with optional fractional seconds.
   public static var date: SchemaComponent<Date> {
     Schema.string().format("date-time").map { text in
       guard FormatValidation.matches(text, format: "date-time") else {
@@ -37,6 +42,7 @@ public enum FoundationSchema {
       throw SchemaDecodingError.extraction("Timestamp cannot be represented by Date")
     }
   }
+  /// Extracts a number only when `Decimal` preserves its exact numeric value.
   public static var decimal: SchemaComponent<Decimal> {
     Schema.number().map { number in
       guard let value = Decimal(string: number.text, locale: Locale(identifier: "en_US_POSIX")),
@@ -46,6 +52,7 @@ public enum FoundationSchema {
       return value
     }
   }
+  /// Decodes canonical base64 text; noncanonical padding or invalid data throws.
   public static var data: SchemaComponent<Data> {
     Schema.string().keyword("contentEncoding", "base64").map { text in
       guard let data = Data(base64Encoded: text), data.base64EncodedString() == text else {

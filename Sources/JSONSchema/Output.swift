@@ -4,15 +4,24 @@
 import Foundation
 import JSONValue
 
+/// The amount and structure of detail included in serialized validation results.
 public enum OutputFormat: String, Sendable, CaseIterable { case flag, basic, detailed, verbose }
 
+/// One evaluation node with schema and instance locations, optional diagnostics, and child evaluations.
 public struct ValidationUnit: Sendable {
+  /// Whether this evaluation node succeeded.
   public let valid: Bool
+  /// The keyword location relative to the validation output's schema path.
   public let keywordLocation: JSONPointer
+  /// The canonical schema resource URI and keyword fragment.
   public let absoluteKeywordLocation: String
+  /// The JSON Pointer locating the evaluated value within the instance.
   public let instanceLocation: JSONPointer
+  /// A diagnostic message for a failed evaluation, when supplied.
   public let error: String?
+  /// An annotation produced at this location, when supplied.
   public let annotation: JSONValue?
+  /// Nested evaluation results in evaluation order.
   public let children: [ValidationUnit]
 
   func rendered(children selected: [ValidationUnit] = []) -> JSONValue {
@@ -81,13 +90,20 @@ public struct ValidationUnit: Sendable {
   }
 }
 
+/// The evaluation tree and its standard JSON and human-readable projections.
 public struct ValidationResult: Sendable {
+  /// The complete root evaluation, including successful and failed branches.
   public let tree: ValidationUnit
+  /// Whether the root evaluation accepted the instance.
   public var valid: Bool { tree.valid }
+  /// Diagnostic units reached through failed branches, in evaluation order.
   public var errors: [ValidationUnit] { tree.leaves(validity: false) }
+  /// Annotation-bearing units reached through successful branches.
   public var annotations: [ValidationUnit] {
     tree.leaves(validity: true).filter { $0.annotation != nil }
   }
+  /// Serializes a flag, flat basic results, condensed detailed results, or the full verbose tree.
+  /// The default is `basic`; `flag` contains only the root validity.
   public func output(_ format: OutputFormat = .basic) -> JSONValue {
     if format == .flag { return ["valid": .bool(valid)] }
     if format == .verbose { return tree.rendered(children: tree.children) }
@@ -105,6 +121,7 @@ public struct ValidationResult: Sendable {
           children: [])
       })
   }
+  /// Returns `Valid` on success or one line per error with instance and keyword locations.
   public var humanReadable: String {
     if valid { return "Valid" }
     return errors.map {

@@ -12,6 +12,7 @@ import JSONValue
 
 /// Standard format assertions. Unrecognized formats remain annotations.
 public enum FormatValidation {
+  /// Checks a known format using the selected draft's rules. Unknown formats return `true`.
   public static func matches(_ text: String, format: String, dialect: Dialect = .draft2020) -> Bool
   {
     switch format {

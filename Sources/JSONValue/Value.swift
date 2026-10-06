@@ -18,11 +18,13 @@ public struct JSONObject: Sendable, Equatable, Sequence, ExpressibleByDictionary
   public init(dictionaryLiteral elements: (String, JSONValue)...) {
     for pair in elements { self[pair.0] = pair.1 }
   }
+  /// Inserts pairs in order; later duplicate keys replace the value at its original position.
   public init(_ elements: [(String, JSONValue)]) {
     for pair in elements { self[pair.0] = pair.1 }
   }
   public var count: Int { members.count }
   public var keys: [String] { members.keys.map(\.text) }
+  /// Looks up an exact Unicode key. Assigning nil removes it; new keys append at the end.
   public subscript(_ name: String) -> JSONValue? {
     get { members[MemberKey(text: name)] }
     set { members[MemberKey(text: name)] = newValue }
@@ -75,6 +77,8 @@ public indirect enum JSONValue: Sendable, Equatable {
     case .object: "object"
     }
   }
+  /// Reads or updates an object member. Reads return nil and writes do nothing for other kinds.
+  /// Assigning nil removes the member from an object.
   public subscript(_ key: String) -> Self? {
     get { objectValue?[key] }
     set {

@@ -3,6 +3,7 @@
 
 import Foundation
 
+/// Compact and pretty preserve number tokens; canonical uses RFC 8785 binary64 semantics.
 public enum JSONSerializationStyle: Sendable { case compact, pretty, canonical }
 
 private enum JSONEmission {
@@ -11,6 +12,9 @@ private enum JSONEmission {
 }
 
 extension JSONValue {
+  /// Emits JSON, using two-space indentation for pretty output.
+  /// Canonical output sorts keys by UTF-16 and may round numbers to binary64;
+  /// it throws `JSONError.canonicalNumberOutOfRange` when no finite Double exists.
   public func serialized(_ style: JSONSerializationStyle = .compact) throws -> String {
     let pretty = style == .pretty
     var pending: [JSONEmission] = [.value(self, 0)]
@@ -57,6 +61,7 @@ extension JSONValue {
     }
     return output
   }
+  /// Returns the UTF-8 bytes of `serialized(_:)`, with the same numeric limits.
   public func serializedData(_ style: JSONSerializationStyle = .compact) throws -> Data {
     Data(try serialized(style).utf8)
   }

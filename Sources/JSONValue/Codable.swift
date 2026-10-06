@@ -7,6 +7,7 @@ import Foundation
 public struct JSONValueEncoder {
   public var keyStrategy: JSONKeyStrategy
   public init(keyStrategy: JSONKeyStrategy = .identity) { self.keyStrategy = keyStrategy }
+  /// Uses the value's Encodable implementation and propagates its encoding failures.
   public func encode<T: Encodable>(_ value: T) throws -> JSONValue {
     let encoder = ValueEncoding(path: [], strategy: keyStrategy)
     try encoder.put(value)
@@ -18,6 +19,7 @@ public struct JSONValueEncoder {
 public struct JSONValueDecoder {
   public var keyStrategy: JSONKeyStrategy
   public init(keyStrategy: JSONKeyStrategy = .identity) { self.keyStrategy = keyStrategy }
+  /// Decodes directly; mismatched types and numbers outside the destination range throw.
   public func decode<T: Decodable>(_ type: T.Type, from value: JSONValue) throws -> T {
     try ValueDecoding(value: value, path: [], strategy: keyStrategy).get(type)
   }

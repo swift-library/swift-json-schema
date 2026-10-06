@@ -22,9 +22,13 @@ struct SchemaNode: Sendable {
 
 /// Compiles all reachable schema resources into an immutable graph.
 public struct SchemaCompiler: Sendable {
+  /// The fallback dialect for resources without a recognized `$schema` declaration.
   public var dialect: Dialect
+  /// The documents and custom vocabularies captured by the next compilation.
   public var registry: SchemaRegistry
+  /// Evaluation options copied into each compiled schema.
   public var options: ValidationOptions
+  /// Creates a compiler using draft 2020-12, bundled metaschemas, and default validation options unless supplied.
   public init(
     dialect: Dialect = .draft2020, registry: SchemaRegistry = .bundled,
     options: ValidationOptions = .init()
@@ -33,6 +37,12 @@ public struct SchemaCompiler: Sendable {
     self.registry = registry
     self.options = options
   }
+  /// Compiles reachable references from the registry without network access.
+  ///
+  /// `baseURI` resolves relative identifiers and references. Compilation throws for
+  /// invalid shapes, unresolved references, duplicate identifiers and unsupported
+  /// required dialects or vocabularies. Call `checkSchema()` on the result for a
+  /// separate metaschema validation of the schema document.
   public func compile(_ schema: JSONValue, baseURI: String = "urn:json-schema:document") throws
     -> CompiledSchema
   {

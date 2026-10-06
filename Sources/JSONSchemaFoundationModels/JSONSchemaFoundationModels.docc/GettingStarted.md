@@ -1,6 +1,8 @@
 # Getting started
 
-A compiling example for JSONSchemaFoundationModels.
+Create a generation schema for an object-shaped tool input.
+
+The bridge requires a Foundation Models SDK and iOS 26 or macOS 26. Guard the import surface and runtime availability when your package also supports older systems.
 
 ```swift
 import JSONSchemaFoundationModels
@@ -15,3 +17,18 @@ func generationExample() throws {
   #endif
 }
 ```
+
+## Supported shapes
+
+The bridge supports concrete string, integer, number, boolean, array, and
+named-object shapes, string enums, alternatives, and references to `$defs`.
+Arrays need an item shape. Tool inputs need an object root. Boolean schemas,
+null shapes, arbitrary additional properties, and unsupported validation
+keywords produce an error.
+
+## Validate generated content
+
+The bridge constructs generation schemas; it does not perform model inference.
+Generation shapes do not replace full JSON Schema validation. Keep the original
+schema and validate the generated JSON with `JSONSchema` before decoding or
+using it.

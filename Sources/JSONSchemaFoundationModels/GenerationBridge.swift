@@ -6,15 +6,25 @@
   import JSONSchema
   import JSONValue
 
+  /// Failures converting a JSON Schema into the Foundation Models representable subset.
   @available(iOS 26.0, macOS 26.0, *)
   public enum GenerationBridgeError: Error {
+    /// A keyword has no supported generation-schema mapping.
     case unsupportedKeyword(String)
+    /// The schema does not describe a representable concrete generation shape.
     case unsupportedShape(String)
+    /// A reference does not identify an available top-level `$defs` entry.
     case unresolvedDefinition(String)
   }
   /// Converts representable shapes; validate generated content with the original schema.
   @available(iOS 26.0, macOS 26.0, *)
   public enum GenerationBridge {
+    /// Converts concrete primitive, array and named-object shapes plus string enums and alternatives.
+    ///
+    /// References must point to top-level `$defs`. Numeric output uses `Int` or
+    /// `Double`; `oneOf` becomes a generation choice without an exclusivity guarantee.
+    /// Validate generated values with the original compiled schema. Throws for
+    /// unsupported keywords, shapes or missing definitions.
     public static func schema(_ document: JSONValue, name: String) throws -> GenerationSchema {
       let definitions = document["$defs"]?.objectValue ?? JSONObject()
       let dependencies = try definitions.map {
@@ -23,6 +33,8 @@
       return try GenerationSchema(
         root: convert(document, name: name, definitions: definitions), dependencies: dependencies)
     }
+    /// Converts an object-root schema for tool input, resolving a local root reference before checking its shape.
+    /// Throws when the root is not an object or normal generation conversion fails.
     public static func toolInput(_ document: JSONValue, name: String) throws -> GenerationSchema {
       var root = document
       if let reference = document["$ref"]?.stringValue, let pointer = try? JSONPointer(reference),

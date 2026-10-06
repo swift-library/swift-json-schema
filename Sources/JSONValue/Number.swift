@@ -5,11 +5,14 @@ import Foundation
 
 /// A finite decimal token with exact comparison and divisibility semantics.
 public struct JSONNumber: Sendable, Equatable, Comparable, Hashable {
+  /// The original JSON number token, including exponent spelling and trailing zeros.
   public let text: String
   private let negative: Bool
   private let coefficient: String
   private let scale: DecimalPower
 
+  /// Validates a JSON number token without converting its coefficient or exponent to Double.
+  /// Throws `JSONError.invalidNumber` for malformed tokens.
   public init(_ text: String) throws {
     let bytes = Array(text.utf8)
     var i = 0
@@ -55,15 +58,20 @@ public struct JSONNumber: Sendable, Equatable, Comparable, Hashable {
   }
 
   public init<T: BinaryInteger>(_ integer: T) { self = try! Self(String(integer)) }
+  /// Captures the finite Double's decimal spelling; rejects NaN and infinity.
   public init(_ value: Double) throws {
     guard value.isFinite else { throw JSONError.invalidNumber(String(value)) }
     try self.init(String(value))
   }
+  /// Whether the exact decimal value is integral, regardless of token spelling.
   public var isInteger: Bool { coefficient == "0" || scale >= DecimalPower(0) }
+  /// A finite binary64 approximation, or nil on overflow; precision loss and underflow are possible.
   public var doubleValue: Double? { Double(text).flatMap { $0.isFinite ? $0 : nil } }
+  /// An exact machine-sized integer when `integerText` can be formed and fits in Int.
   public var intValue: Int? {
     integerText.flatMap(Int.init)
   }
+  /// Exact integer spelling when fewer than 20 trailing zeros need expansion; otherwise nil.
   public var integerText: String? {
     guard isInteger, let shift = scale.smallValue, shift >= 0, shift < 20 else { return nil }
     return (negative ? "-" : "") + coefficient + String(repeating: "0", count: shift)

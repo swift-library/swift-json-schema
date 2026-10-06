@@ -8,15 +8,24 @@ import JSONValue
   import FoundationNetworking
 #endif
 
+/// The network boundary for asynchronous schema compilation.
 public enum ResolverPolicy: Sendable {
+  /// Resolve only registered documents; unresolved references throw without calling the resolver.
   case offline
+  /// Fetch HTTPS documents from the exact allowed host names, up to the document limit.
+  /// The default limit is 32; a repeated unresolved fetched document also fails.
   case https(hosts: Set<String>, maximumDocuments: Int = 32)
 }
+/// An explicit asynchronous source of JSON documents for allowed reference URIs.
 public struct SchemaResolver: Sendable {
+  /// Loads one fragment-free document URI or throws; custom closures own their transport behavior.
   public let resolve: @Sendable (String) async throws -> JSONValue
+  /// Stores a sendable document-loading closure.
   public init(resolve: @escaping @Sendable (String) async throws -> JSONValue) {
     self.resolve = resolve
   }
+  /// Loads HTTPS JSON in an ephemeral URLSession, allowing only same-host HTTPS redirects.
+  /// Rejects non-success responses and bodies larger than 8 MiB after download.
   public static let urlSession = Self { uri in
     guard let url = URL(string: uri), url.scheme == "https", let host = url.host else {
       throw SchemaError.unresolvedReference(uri)
@@ -32,6 +41,11 @@ public struct SchemaResolver: Sendable {
   }
 }
 extension SchemaCompiler {
+  /// Compiles with an explicit resolution policy, fetching missing documents into a local registry copy.
+  ///
+  /// Checks cancellation between attempts. Allowed hosts are matched exactly.
+  /// A custom resolver must enforce its own redirect and response-size policies.
+  /// The compiler's original registry remains unchanged.
   public func compile(
     _ schema: JSONValue, baseURI: String = "urn:json-schema:document", policy: ResolverPolicy,
     resolver: SchemaResolver = .urlSession
@@ -58,6 +72,8 @@ extension SchemaCompiler {
       }
     }
   }
+  /// Compiles offline and embeds referenced resources into a draft 2020-12 compound document.
+  /// Throws if compilation fails or the root uses another dialect.
   public func bundle(_ schema: JSONValue, baseURI: String = "urn:json-schema:document") throws
     -> JSONValue
   {

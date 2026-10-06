@@ -3,6 +3,7 @@
 
 import Foundation
 
+/// Selects the first or last value for an exact duplicate key, or rejects the document.
 public enum DuplicateKeyPolicy: Sendable { case first, last, reject }
 
 /// Byte column and offset refer to UTF-8; pointer identifies the value being read.
@@ -15,13 +16,17 @@ public struct JSONParseError: Error, Sendable, CustomStringConvertible {
   public var description: String { "\(message) at \(line):\(column) (\(pointer))" }
 }
 
+/// Parses one complete UTF-8 JSON value while retaining number tokens and object order.
 public struct JSONParser: Sendable {
   public var duplicateKeys: DuplicateKeyPolicy
+  /// Maximum nesting checked while reading child values; defaults to 256.
   public var maximumDepth: Int
+  /// Defaults to the last duplicate value and a nesting limit of 256.
   public init(duplicateKeys: DuplicateKeyPolicy = .last, maximumDepth: Int = 256) {
     self.duplicateKeys = duplicateKeys
     self.maximumDepth = maximumDepth
   }
+  /// Throws `JSONParseError` for invalid UTF-8, syntax, trailing input, or nesting overflow.
   public func parse(_ data: Data) throws -> JSONValue {
     var reader = UTF8Reader(bytes: Array(data), options: self)
     guard String(data: data, encoding: .utf8) != nil else { throw reader.failure("Invalid UTF-8") }
@@ -34,7 +39,9 @@ public struct JSONParser: Sendable {
 }
 
 extension JSONValue {
+  /// Parses with `JSONParser` defaults: last duplicate value and a nesting limit of 256.
   public static func parse(_ text: String) throws -> Self { try JSONParser().parse(text) }
+  /// Parses UTF-8 bytes using the default duplicate-key and nesting policies.
   public static func parse(_ bytes: Data) throws -> Self { try JSONParser().parse(bytes) }
 }
 

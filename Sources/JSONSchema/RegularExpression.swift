@@ -7,6 +7,7 @@ import Foundation
 public struct ECMARegularExpression: Sendable {
   private let expression: PatternExpression
   private let names: [Data: Int]
+  /// Parses a pattern and checks capture references; throws for unsupported or malformed syntax.
   public init(_ pattern: String) throws {
     var grammar = PatternGrammar(input: Array(pattern.unicodeScalars))
     expression = try grammar.alternatives()
@@ -16,6 +17,7 @@ public struct ECMARegularExpression: Sendable {
     try expression.checkReferences(count: grammar.captures, names: grammar.names)
     names = grammar.names
   }
+  /// Searches for a match at any Unicode-scalar position, including the end of an empty string.
   public func matches(_ string: String) -> Bool {
     var machine = PatternMachine(input: Array(string.unicodeScalars), names: names)
     for start in 0...machine.input.count {

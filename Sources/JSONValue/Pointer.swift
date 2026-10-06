@@ -6,7 +6,9 @@ import Foundation
 /// RFC 6901 tokens retain their spelling until resolved against a value.
 public struct JSONPointer: Sendable, Hashable, CustomStringConvertible {
   public let tokens: [String]
+  /// Takes unescaped tokens; an empty list identifies the complete document.
   public init(tokens: [String] = []) { self.tokens = tokens }
+  /// Parses a pointer or percent-encoded fragment, throwing `JSONError.invalidPointer` on bad syntax.
   public init(_ text: String) throws {
     var value = text
     if value.hasPrefix("#") {
@@ -55,6 +57,8 @@ public struct JSONPointer: Sendable, Hashable, CustomStringConvertible {
   public func hash(into hasher: inout Hasher) {
     for token in tokens { hasher.combine(Array(token.utf8)) }
   }
+  /// Resolves object keys or canonical nonnegative array indexes.
+  /// Missing members, out-of-range indexes, and the array append token throw `JSONError.missingValue`.
   public func resolve(in document: JSONValue) throws -> JSONValue {
     var current = document
     for token in tokens {
@@ -100,6 +104,8 @@ public struct RelativeJSONPointer: Sendable {
     }
     tail = try JSONPointer(keyQuery ? "" : rest)
   }
+  /// Resolves relative to a location, applying parent and optional array-index offsets.
+  /// A key query returns an object key string or array index number; invalid locations throw.
   public func resolve(in document: JSONValue, from location: JSONPointer) throws -> JSONValue {
     guard levels <= location.tokens.count else {
       throw JSONError.missingValue(location.description)

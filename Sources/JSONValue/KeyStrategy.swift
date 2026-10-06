@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0 WITH Swift-exception
 // Copyright (c) 2026 Xudong Xu
 
+/// Transforms Codable property keys using identity, snake case, or kebab case.
 public enum JSONKeyStrategy: Sendable {
   case identity
   case snakeCase
   case kebabCase
 
+  /// Converts a property key for encoding, splitting uppercase word boundaries.
   public func key(_ text: String) -> String {
     if self == .identity { return text }
     let characters = Array(text)

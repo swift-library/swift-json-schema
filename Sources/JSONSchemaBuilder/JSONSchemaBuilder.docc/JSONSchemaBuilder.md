@@ -1,6 +1,13 @@
 # ``JSONSchemaBuilder``
 
-JSONSchemaBuilder public APIs.
+Construct draft 2020-12 schemas with a typed DSL and Swift macros.
+
+@Metadata {
+    @PageImage(purpose: icon, source: "jsonschemabuilder-icon", alt: "swift-json-schema logo")
+    @PageColor(purple)
+}
+
+Build a ``SchemaComponent`` from property and composition builders, or use the `@Schemable` macro on a model. Both paths validate JSON before extracting a Swift value.
 
 ## Topics
 

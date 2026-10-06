@@ -6,6 +6,7 @@ import JSONValue
 
 /// A compiled schema can be reused concurrently; all evaluation state is call-local.
 public struct CompiledSchema: Sendable {
+  /// The original schema document supplied to compilation.
   public let schema: JSONValue
   let nodes: [SchemaNode]
   let root: Int
@@ -13,15 +14,22 @@ public struct CompiledSchema: Sendable {
   let options: ValidationOptions
   let custom: [String: SchemaVocabulary]
   let registry: SchemaRegistry
+  /// The root resource's effective dialect after resolving its `$schema` declaration.
   public var dialect: Dialect { nodes[root].dialect }
+  /// Validates a JSON value with call-local evaluation state and returns a structured result.
+  /// An invalid instance or an exhausted evaluation limit is reported in the result.
   public func validate(_ value: JSONValue) -> ValidationResult {
     var evaluation = Evaluator(compiled: self)
     return ValidationResult(
       tree: evaluation.run(root, value: value, instance: .init(), path: .init(), scopes: []).unit)
   }
+  /// Parses JSON text with the parser's default limits, then validates it.
+  /// Parsing errors throw; schema violations are returned in the result.
   public func validate(_ text: String) throws -> ValidationResult {
     validate(try JSONValue.parse(text))
   }
+  /// Validates the schema document against its registered metaschema with format assertions enabled.
+  /// Throws if the metaschema cannot be found or compiled.
   public func checkSchema() throws -> ValidationResult {
     let uri = schema["$schema"]?.stringValue ?? dialect.rawValue
     guard let meta = registry.documents[URI.document(uri)] else {
