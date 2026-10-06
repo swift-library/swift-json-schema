@@ -15,7 +15,7 @@ let package = Package(
     .executable(name: "json-schema", targets: ["JSONSchemaCLI"]),
   ],
   dependencies: [
-    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "604.0.0"),
     .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.0"),
   ],
   targets: [
