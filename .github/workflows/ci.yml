@@ -9,6 +9,6 @@ permissions:
 jobs:
   policy:
     if: github.event_name == 'pull_request' || github.event_name == 'push'
-    uses: swift-library/.github/.github/workflows/policy.yml@7badcc53166c6afcb265b39c789b8240d9a30233
+    uses: swift-library/.github/.github/workflows/policy.yml@8f7b235b85fc062a801895b95f2e4bccd93fed3d
   validate:
-    uses: swift-library/.github/.github/workflows/swift-package-ci.yml@7badcc53166c6afcb265b39c789b8240d9a30233
+    uses: swift-library/.github/.github/workflows/swift-package-ci.yml@8f7b235b85fc062a801895b95f2e4bccd93fed3d
