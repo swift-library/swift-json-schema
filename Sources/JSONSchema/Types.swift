@@ -164,11 +164,14 @@ enum URI {
     return pieces.count == 2 ? String(pieces[1]).removingPercentEncoding ?? String(pieces[1]) : ""
   }
   static func resolve(_ reference: String, against base: String) throws -> String {
-    if reference.hasPrefix("#") { return document(base) + reference }
-    guard let baseURL = URL(string: base),
-      let result = URL(string: reference, relativeTo: baseURL)?.absoluteURL
+    let parts = reference.split(separator: "#", maxSplits: 1, omittingEmptySubsequences: false)
+    let suffix = parts.count == 2 ? "#" + parts[1] : ""
+    if parts[0].isEmpty { return document(base) + suffix }
+    // A fragment is independent of path normalization, including for opaque URNs.
+    guard let baseURL = URL(string: document(base)),
+      let result = URL(string: String(parts[0]), relativeTo: baseURL)?.absoluteURL
     else { throw SchemaError.unresolvedReference(reference) }
-    return result.standardized.absoluteString
+    return result.standardized.absoluteString + suffix
   }
   static func location(_ base: String, _ pointer: JSONPointer) -> String {
     document(base) + pointer.fragment
