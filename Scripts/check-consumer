@@ -15,7 +15,7 @@ source = destination / "Sources/Examples"
 source.mkdir(parents=True, exist_ok=True)
 modules = json.loads((root / ".github/release.json").read_text())["documentation_targets"]
 products = ", ".join('.product(name: ' + json.dumps(m) + ', package: "swift-json-schema")' for m in modules)
-(destination / "Package.swift").write_text('// swift-tools-version: 6.2\nimport PackageDescription\nlet package = Package(name: "Examples", platforms: [.macOS(.v15)], dependencies: [.package(path: ' + json.dumps(str(root)) + ')], targets: [.executableTarget(name: "Examples", dependencies: [' + products + '])])\n')
+(destination / "Package.swift").write_text('// swift-tools-version: 6.2\nimport PackageDescription\nlet package = Package(name: "Examples", platforms: [.macOS(.v15)], dependencies: [.package(name: "swift-json-schema", path: "../..")], targets: [.executableTarget(name: "Examples", dependencies: [' + products + '])])\n')
 for module in modules:
     for example in (root / "Sources" / module / (module + ".docc/Resources")).glob("*.swift"):
         shutil.copy2(example, source / example.name)

@@ -40,6 +40,7 @@ private func exercise(_ dialect: Dialect, category: String) throws {
     for group in groups {
       let tests = try #require(group["tests"]?.arrayValue)
       total += tests.count
+      let groupDescription = group["description"]?.stringValue ?? ""
       do {
         let schema = try compiler.compile(try #require(group["schema"]))
         for test in tests {
@@ -50,18 +51,15 @@ private func exercise(_ dialect: Dialect, category: String) throws {
           if actual.valid == expected {
             passed += 1
           } else {
+            let testDescription = test["description"]?.stringValue ?? ""
             let message =
-              file.lastPathComponent + ": " + (group["description"]?.stringValue ?? "") + " / "
-              + (test["description"]?.stringValue ?? "") + " expected \(expected); "
-              + actual.humanReadable
+              "\(file.lastPathComponent): \(groupDescription) / \(testDescription) expected \(expected); \(actual.humanReadable)"
             failures.append(message)
             if category == "required" { Issue.record(Comment(rawValue: message)) }
           }
         }
       } catch {
-        let message =
-          file.lastPathComponent + ": " + (group["description"]?.stringValue ?? "")
-          + " / compile: \(error)"
+        let message = "\(file.lastPathComponent): \(groupDescription) / compile: \(error)"
         failures.append(message)
         if category == "required" { Issue.record(Comment(rawValue: message)) }
       }
