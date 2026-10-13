@@ -1,0 +1,21 @@
+swift-json-schema
+Copyright (c) 2026 Xudong Xu
+
+Licensed under Apache License 2.0 with the Swift Runtime Library Exception.
+See LICENSE.txt for the complete terms.
+
+Bundled test data retains its own licenses:
+
+JSON-Schema-Test-Suite
+Copyright (c) 2012 Julian Berman
+MIT License
+Source: https://github.com/json-schema-org/JSON-Schema-Test-Suite
+License: Tests/JSONSchemaTests/JSONSchemaTestSuite/LICENSE
+
+JSONTestSuite
+Copyright (c) 2016 Nicolas Seriot
+MIT License
+Source: https://github.com/nst/JSONTestSuite
+License: Tests/JSONValueTests/JSONTestSuite/LICENSE
+
+Pinned fixture revisions are recorded in Tests/Fixtures.lock.json.
