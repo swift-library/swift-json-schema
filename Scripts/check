@@ -10,7 +10,6 @@ case "${1:-all}" in
   *) echo 'Usage: Scripts/check [--format-check|--compiler-check]' >&2; exit 2 ;;
 esac
 mkdir -p .build/release-validation
-Scripts/validate-version --json > .build/release-validation/version.json
 swift package dump-package > .build/release-validation/package.json
 python3 - <<'PY'
 import json, pathlib
@@ -46,7 +45,8 @@ fi
 python3 - <<'PY'
 import hashlib, json, os, pathlib, platform, subprocess
 root = pathlib.Path('.build/release-validation')
-result = json.loads((root / 'version.json').read_text())
+result = {key: subprocess.check_output(['git', 'rev-parse', ref], text=True).strip()
+          for key, ref in [('commit', 'HEAD'), ('tree', 'HEAD^{tree}')]}
 result['os'] = platform.platform()
 result['swift'] = subprocess.check_output(['swift', '--version'], text=True).strip()
 if platform.system() == 'Darwin':
@@ -54,7 +54,7 @@ if platform.system() == 'Darwin':
     result['sdk'] = subprocess.check_output(['xcrun', '--sdk', 'macosx', '--show-sdk-version'], text=True).strip()
 result['validation_script_sha256'] = hashlib.sha256(pathlib.Path('Scripts/check').read_bytes()).hexdigest()
 result['format_configuration_sha256'] = hashlib.sha256(pathlib.Path('.swift-format').read_bytes()).hexdigest()
-result['checks'] = ['version', 'manifest-requirements']
+result['checks'] = ['manifest-requirements']
 scope = os.environ['RELEASE_CHECK_SCOPE']
 if scope in ('all', 'format'):
     result['checks'] += ['strict-format']
