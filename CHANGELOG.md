@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 0.1.0
 
 - Ordered, lossless JSON values, strict parsing, canonical serialization, and Codable conversion.

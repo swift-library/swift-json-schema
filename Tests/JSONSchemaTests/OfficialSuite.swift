@@ -10,10 +10,10 @@ private let suiteURL = Bundle.module.resourceURL!.appendingPathComponent("JSONSc
 
 private func registry() throws -> SchemaRegistry {
   var result = SchemaRegistry.bundled
-  let remotes = suiteURL.appendingPathComponent("remotes")
+  let remotes = suiteURL.appendingPathComponent("remotes").resolvingSymlinksInPath()
   let files = FileManager.default.enumerator(at: remotes, includingPropertiesForKeys: nil)!
   for case let file as URL in files where file.pathExtension == "json" {
-    let relative = String(file.path.dropFirst(remotes.path.count + 1))
+    let relative = String(file.resolvingSymlinksInPath().path.dropFirst(remotes.path.count + 1))
     result.register(
       try JSONValue.parse(Data(contentsOf: file)), at: "http://localhost:1234/" + relative)
   }

@@ -46,6 +46,10 @@ keeps its own evaluation state.
 
 ## Install
 
+This is an independent implementation. It shares the SwiftPM package identity
+`swift-json-schema` with [ajevans99/swift-json-schema](https://github.com/ajevans99/swift-json-schema),
+so both repositories cannot appear in the same package dependency graph.
+
 Add the package and the products you need to `Package.swift`:
 
 ```swift

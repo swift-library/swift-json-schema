@@ -1,69 +1,30 @@
 # Versioning and Release
 
-This document owns the package's version declaration, compatibility policy,
-system support window and release acceptance. It adopts the
-[swift-library versioning standard](https://github.com/swift-library/.github/blob/master/VERSIONING.md).
-Operational commands live in the [Release Guide](../Reference/ReleaseGuide.md).
+swift-json-schema follows the [shared release standard](https://github.com/swift-library/.github/blob/master/VERSIONING.md).
+`VERSION` declares the products' version, `CHANGELOG.md` records release notes,
+and `.github/release.json` selects validation, documentation targets and the
+pinned Linux compiler image.
 
-## Version Authority and Compatibility
+## Compatibility surface
 
-`VERSION` owns the repository release version for its library products.
-`CHANGELOG.md` owns the matching release notes. `.github/release.json` identifies
-these files and owns the package's CI selection. `Scripts/validate-version`
-checks them and optionally an existing `vVERSION` tag at HEAD; it leaves version
-inputs unchanged.
+Compatibility includes JSON value and number representations, schema compilation
+and evaluation, typed builders and macros, Foundation conversions, Foundation
+Models bridging, CLI options and outputs, and compiler/platform requirements.
 
-During 0.x, fixes and compatible additions increment PATCH, and incompatible
-changes increment MINOR with an explicit upgrade note. From 1.0.0, compatible
-additions increment MINOR and incompatible changes increment MAJOR. Reset lower
-components when increasing MINOR or MAJOR. Optional previews use alpha.N, beta.N or rc.N with
-positive sequence numbers.
+## Requirements and validation
 
-Compatibility includes public Swift APIs, serialized output, and compiler/platform
-requirements. Documentation, formatting and CI changes alone do not force a
-product release. Library consumers use next-minor bounds during 0.x.
+The package requires Swift 6.2, iOS 18 or macOS 15 and supports Linux.
+The maintained Apple system window covers iOS 18/26/27 and macOS 15/26/27.
+Foundation Models bridging requires iOS 26 or macOS 26 at runtime and a matching SDK.
+CI tests Swift 6.2 on macOS 15 and Linux and Swift 6.3 on macOS 26, with
+strict formatting checked separately.
 
-Strict formatting uses one declared formatter toolchain. Compiler compatibility
-jobs run the compiler-check scope, and the separate format-check job enforces
-the complete formatting configuration. Local checks run both scopes.
+`Scripts/check` checks declarations, formatting, consumer tooling, Swift tests,
+release builds, CLI behavior, consumer examples and DocC on macOS. Compliance
+reports use the fixture revision and archive checksum in `Tests/Fixtures.lock.json`.
+The optional draft-04 integer mismatch remains visible in those reports.
+Evidence belongs in `.build/release-validation`; raw compliance reports are
+produced in `.build/compliance`.
 
-## Supported Environments
-
-Package.swift declares iOS 18 and macOS 15 deployment floors, and Swift tools 6.2.
-The system support window currently contains iOS 18/26/27 and macOS 15/26/27.
-Review the three most recent formal system generations when preparing a release.
-Raise a floor through a reviewed compatibility release; existing releases retain
-their original requirements.
-
-Compiler requirements are maintained independently. CI tests the declared
-minimum compiler on macOS 15 and a current hosted compiler on macOS 26. Linux validation uses the pinned Swift container declared in the CI configuration.
-Foundation Models APIs require iOS 26 or macOS 26 at runtime. Record
-the precise OS, compiler and SDK in the release evidence.
-
-README owns usage and API examples. Add module documentation with the target
-as its public API grows.
-
-## Candidate and Publication
-
-Release acceptance uses clean committed source, strict formatting, complete
-Swift tests, Release builds, compiler/platform checks
-and a fresh remote consumer. The tested lockfile is enforced for repository
-builds; consumer validation also records its independently resolved dependency
-graph. Source ownership and dependency notices are reviewed when dependencies
-or incorporated code change.
-
-Validation records the commit/tree, lockfile digest, toolchain, OS, SDK, checker
-digest and logs beneath `.build/release-validation`. CI retains those outputs
-as artifacts; publication attaches the accepted evidence archive. Revalidate
-changed source, dependencies, configuration and checks on the new candidate.
-
-After candidate acceptance, create the immutable version tag and verify a
-fresh consumer using its SemVer requirement. The release workflow validates
-the existing tag, checks its accepted commit and release notes, then publishes
-from a separate contents-write job. An interrupted draft can resume when its
-notes and evidence agree. Tagged source corrections use a new version.
-
-The latest released line is maintained by default. Weekly dependency and Action
-updates receive compatibility, lockfile and CI review before merging. Security
-reports use the private route in SECURITY.md. Existing source history and
-third-party ownership notices retain their provenance role.
+README owns usage and conformance results. Module DocC catalogs are colocated
+with their targets.
