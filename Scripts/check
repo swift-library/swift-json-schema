@@ -54,6 +54,9 @@ if platform.system() == 'Darwin':
     result['sdk'] = subprocess.check_output(['xcrun', '--sdk', 'macosx', '--show-sdk-version'], text=True).strip()
 result['validation_script_sha256'] = hashlib.sha256(pathlib.Path('Scripts/check').read_bytes()).hexdigest()
 result['format_configuration_sha256'] = hashlib.sha256(pathlib.Path('.swift-format').read_bytes()).hexdigest()
+lock_bytes = pathlib.Path('Package.resolved').read_bytes()
+result['dependency_lock_sha256'] = hashlib.sha256(lock_bytes).hexdigest()
+result['dependency_pins'] = json.loads(lock_bytes)['pins']
 result['checks'] = ['manifest-requirements']
 scope = os.environ['RELEASE_CHECK_SCOPE']
 if scope in ('all', 'format'):

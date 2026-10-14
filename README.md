@@ -56,7 +56,7 @@ Add the package and the products you need to `Package.swift`:
 dependencies: [
   .package(
     url: "https://github.com/swift-library/swift-json-schema.git",
-    .upToNextMinor(from: "0.1.0")
+    .upToNextMinor(from: "0.1.1")
   ),
 ],
 targets: [
