@@ -17,7 +17,12 @@ The package requires Swift 6.2, iOS 18 or macOS 15 and supports Linux.
 The maintained Apple system window covers iOS 18/26/27 and macOS 15/26/27.
 Foundation Models bridging requires iOS 26 or macOS 26 at runtime and a matching SDK.
 CI tests Swift 6.2 on macOS 15 and Linux and Swift 6.3 on macOS 26, with
-strict formatting checked separately.
+strict formatting checked separately. The committed dependency lock selects the
+upper tested SwiftSyntax release. A separate Swift 6.2 lane runs
+`Scripts/check-dependency-minimum swift-syntax`, resolving the manifest’s lower
+bound in an archived source tree and running its tests and release build. Both
+lanes record the actual dependency revision; the package supports the manifest’s
+602.0.0..<605.0.0 range.
 
 `Scripts/check` checks declarations, formatting, consumer tooling, Swift tests,
 release builds, CLI behavior, consumer examples and DocC on macOS. Compliance

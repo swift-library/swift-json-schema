@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0 WITH Swift-exception
+# Copyright (c) 2026 Xudong Xu
+"""Build and test the manifest's minimum dependency in an isolated source archive."""
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import shutil
+import subprocess
+
+
+def minimum_version(manifest, identity):
+    dependencies = [item for dependency in manifest['dependencies']
+                    for item in dependency.get('sourceControl', [])
+                    if item['identity'] == identity]
+    if len(dependencies) != 1:
+        raise ValueError('Expected one source-control dependency: ' + identity)
+    ranges = dependencies[0]['requirement'].get('range', [])
+    if len(ranges) != 1:
+        raise ValueError('Expected a version range: ' + identity)
+    return ranges[0]['lowerBound']
+
+
+def resolved_pin(lock, identity, expected):
+    pins = [pin for pin in lock['pins'] if pin['identity'] == identity]
+    if len(pins) != 1 or pins[0]['state'].get('version') != expected:
+        raise ValueError('Resolution did not select the required minimum: ' + identity)
+    return pins[0]
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('identity')
+    identity = parser.parse_args().identity
+    root = Path(__file__).resolve().parent.parent
+    commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
+    destination = root / '.build/dependency-minimum'
+    evidence = root / '.build/release-validation'
+    evidence.mkdir(parents=True, exist_ok=True)
+    if destination.exists():
+        shutil.rmtree(destination)
+    destination.mkdir(parents=True)
+    archive = subprocess.check_output(['git', 'archive', commit], cwd=root)
+    subprocess.run(['tar', '-xf', '-', '-C', str(destination)], input=archive, check=True)
+    manifest = json.loads(subprocess.check_output(['swift', 'package', 'dump-package'], cwd=destination))
+    minimum = minimum_version(manifest, identity)
+    receipt = {'commit': commit, 'identity': identity, 'minimum': minimum,
+               'swift': subprocess.check_output(['swift', '--version'], text=True).strip()}
+    try:
+        commands = [
+            ('resolve', ['swift', 'package', '--security-path', '.build/security',
+                         'resolve', identity, '--version', minimum]),
+            ('tests', ['swift', 'test', '--force-resolved-versions']),
+            ('release', ['swift', 'build', '-c', 'release', '--force-resolved-versions']),
+        ]
+        for label, command in commands:
+            print('Minimum dependency ' + identity + ': ' + label, flush=True)
+            with (evidence / ('dependency-minimum-' + label + '.log')).open('w') as log:
+                result = subprocess.run(command, cwd=destination, stdout=log,
+                                        stderr=subprocess.STDOUT, timeout=3600)
+            receipt[label + '_exit_status'] = result.returncode
+            result.check_returncode()
+            if label == 'resolve':
+                lock_bytes = (destination / 'Package.resolved').read_bytes()
+                receipt['pin'] = resolved_pin(json.loads(lock_bytes), identity, minimum)
+                receipt['lock_sha256'] = hashlib.sha256(lock_bytes).hexdigest()
+        print('Minimum dependency build and tests passed: ' + identity + ' ' + minimum)
+    finally:
+        (evidence / 'dependency-minimum.json').write_text(json.dumps(receipt, indent=2) + '\n')
+        shutil.rmtree(destination)
+
+
+if __name__ == '__main__':
+    main()

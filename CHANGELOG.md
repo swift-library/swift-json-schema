@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.1.1
+
+- Allow SwiftSyntax 602, 603 and 604 without raising the Swift compiler minimum.
+
 ## 0.1.0
 
 - Ordered, lossless JSON values, strict parsing, canonical serialization, and Codable conversion.
