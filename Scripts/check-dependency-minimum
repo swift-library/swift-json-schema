@@ -50,6 +50,7 @@ def main():
                'swift': subprocess.check_output(['swift', '--version'], text=True).strip()}
     try:
         commands = [
+            ('initialize', ['swift', 'package', '--security-path', '.build/security', 'resolve']),
             ('resolve', ['swift', 'package', '--security-path', '.build/security',
                          'resolve', identity, '--version', minimum]),
             ('tests', ['swift', 'test', '--force-resolved-versions']),
