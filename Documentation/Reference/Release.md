@@ -67,7 +67,7 @@ records Xcode and SDK versions.
 | Version update and check | Not established. | Not established. |
 | Candidate validation and build | `Scripts/check`; `Scripts/check-dependency-minimum swift-syntax` for the minimum dependency lane. | Not established. |
 | Status and interrupted-run recovery | Not established. | Not established. |
-| Acceptance and publication | Retain native, platform and consumer evidence for the accepted source under `.build/release-validation`. | Not established. |
+| Acceptance and publication | Run [`Release`](../../.github/workflows/release.yml) with the accepted tag; it validates the tag and publishes the GitHub release. Retain native, platform and consumer evidence for the accepted source under `.build/release-validation`. | Repository write access to run workflows |
 | Cleanup | Not established. | Not established. |
 
 Evidence belongs in `.build/release-validation`; raw compliance reports are
