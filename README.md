@@ -97,7 +97,7 @@ Choose the JSON value, schema validation, builder, conversion, or Foundation Mod
 - [Schema builders and macros](Sources/JSONSchemaBuilder/JSONSchemaBuilder.docc/GettingStarted.md)
 - [Foundation conversions](Sources/JSONSchemaConversion/JSONSchemaConversion.docc/GettingStarted.md)
 - [Foundation Models bridge](Sources/JSONSchemaFoundationModels/JSONSchemaFoundationModels.docc/GettingStarted.md)
-- [Versioning and release policy](Documentation/Architecture/VersioningAndRelease.md)
+- [Release](Documentation/Reference/Release.md): release facts and mechanics; version rules are in VERSIONING.
 
 ## Contributing
 
