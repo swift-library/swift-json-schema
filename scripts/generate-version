@@ -1,0 +1,15 @@
+#!/bin/sh
+# SPDX-License-Identifier: Apache-2.0 WITH Swift-exception
+# Copyright (c) 2026 Xudong Xu
+set -eu
+version=$(tr -d '[:space:]' < "$1")
+case $version in
+  '' | *[!0-9A-Za-z.+-]*)
+    echo "Unsupported version: $version" >&2
+    exit 1
+    ;;
+esac
+printf '%s\n' \
+  '// SPDX-License-Identifier: Apache-2.0 WITH Swift-exception' \
+  '// Copyright (c) 2026 Xudong Xu' \
+  "enum PackageVersion { static let value = \"$version\" }" > "$2"

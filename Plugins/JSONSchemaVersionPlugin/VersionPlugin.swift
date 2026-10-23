@@ -9,12 +9,12 @@ struct VersionPlugin: BuildToolPlugin {
   func createBuildCommands(context: PluginContext, target: any Target) async throws -> [Command] {
     let root = context.package.directoryURL
     let input = root.appendingPathComponent("VERSION")
-    let script = root.appendingPathComponent("Scripts/generate-version")
+    let script = root.appendingPathComponent("scripts/generate-version")
     let output = context.pluginWorkDirectoryURL.appendingPathComponent("PackageVersion.swift")
     return [
       .buildCommand(
-        displayName: "Generate package version", executable: URL(fileURLWithPath: "/usr/bin/env"),
-        arguments: ["python3", script.path, input.path, output.path], inputFiles: [input, script],
+        displayName: "Generate package version", executable: URL(fileURLWithPath: "/bin/sh"),
+        arguments: [script.path, input.path, output.path], inputFiles: [input, script],
         outputFiles: [output])
     ]
   }

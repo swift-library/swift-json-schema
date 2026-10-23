@@ -55,6 +55,7 @@ import Testing
     ])
     for value: JSONValue in [["name": "Ada"], ["name": 2], [:]] {
       let result = schema.validate(value)
+      #expect(result.output(.flag) == ["valid": .bool(result.valid)])
       for format in OutputFormat.allCases {
         #expect(outputValidator.validate(result.output(format)).valid)
       }

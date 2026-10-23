@@ -101,8 +101,8 @@ Choose the JSON value, schema validation, builder, conversion, or Foundation Mod
 
 ## Contributing
 
-See [Contributing](CONTRIBUTING.md). Run `Scripts/check` for formatting, tests,
-the Release build, CLI checks, compiling examples, and DocC validation on macOS.
+See [Contributing](CONTRIBUTING.md) for local build, test, formatting, CLI and
+compliance checks. CI also builds the module DocC catalogs.
 
 ## License
 

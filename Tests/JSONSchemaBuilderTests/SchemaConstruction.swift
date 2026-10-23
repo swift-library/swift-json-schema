@@ -83,6 +83,13 @@ struct Settings { var mode: Mode = .minimal }
     #expect(try Schema.integer().array().decode(from: "[1,2,3]") == [1, 2, 3])
     #expect(try Schema.string().nullable().decode(from: "null") == nil)
     #expect(try Schema.integer().map { $0 * 2 }.decode(from: "7") == 14)
+    struct Person: Decodable {
+      let name: String
+      let age: Int
+    }
+    let person = try definition.decode(Person.self, from: ["name": "Ada", "age": 42])
+    #expect(person.name == "Ada")
+    #expect(person.age == 42)
   }
 
   @Test func generatedDefinitionsAndMetadata() throws {
@@ -94,6 +101,7 @@ struct Settings { var mode: Mode = .minimal }
       try Contact.compile().validate(JSONValue.parse(#"{"display_name":"Ada","age":21}"#)).valid)
     let contact = try Contact.decode(from: ["display_name": "Ada", "age": 21])
     #expect(contact.displayName == "Ada")
+    #expect(contact.age == 21)
     #expect(
       try JSONValueEncoder(keyStrategy: Contact.schemaKeyStrategy).encode(contact)["display_name"]
         == "Ada")

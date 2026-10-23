@@ -57,6 +57,14 @@ points.
 - Keep source changes under `Sources/` and tests under `Tests/`.
 - For GitHub-facing collaboration files, use `.github/` and root governance
   files when present.
+- `.github/swift-package.json` owns shared CI validation options and repository
+  commands; `.github/release.json` owns release declarations. Required checks
+  are `policy / policy` and `validate / result`.
+- Validate locally with `swift build`, `swift test`, `swift build -c release`,
+  strict `xcrun swift-format lint` over the configured format paths, and every
+  configured repository command. See `CONTRIBUTING.md` for the commands.
+- Keep repository automation in lowercase `scripts/`. The version build plugin
+  uses `scripts/generate-version`.
 
 ## Authority
 
