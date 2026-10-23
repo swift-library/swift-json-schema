@@ -1,0 +1,52 @@
+{
+  "compilers": [
+    {
+      "name": "macos-15-swift-6.2",
+      "runner": "macos-15",
+      "xcode": "26.0.1"
+    },
+    {
+      "name": "macos-26-swift-6.3",
+      "runner": "macos-26",
+      "xcode": "26.6"
+    }
+  ],
+  "timeout_minutes": 90,
+  "format": {
+    "paths": [
+      "Package.swift",
+      "Sources",
+      "Tests",
+      "Plugins",
+      "Benchmarks/Package.swift",
+      "Benchmarks/Sources"
+    ]
+  },
+  "platforms": {
+    "linux": [
+      {
+        "name": "linux-swift-6.2",
+        "image": "swift:6.2.4-noble@sha256:eccc7a97f9b9881d9659e2e788081fd7675f86d39793b51200bfb178398b3784"
+      }
+    ]
+  },
+  "docs": {
+    "targets": [
+      "JSONValue",
+      "JSONSchema",
+      "JSONSchemaBuilder",
+      "JSONSchemaConversion",
+      "JSONSchemaFoundationModels"
+    ]
+  },
+  "commands": [
+    {
+      "name": "cli",
+      "run": "swift build -c release --product json-schema\nJSON_SCHEMA_CLI=\"$(swift build -c release --show-bin-path)/json-schema\" python3 -B -m unittest discover -s Tests/CLITests"
+    },
+    {
+      "name": "compliance",
+      "run": "swift test --filter OfficialSuite"
+    }
+  ]
+}

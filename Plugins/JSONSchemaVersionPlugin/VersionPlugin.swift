@@ -9,7 +9,7 @@ struct VersionPlugin: BuildToolPlugin {
   func createBuildCommands(context: PluginContext, target: any Target) async throws -> [Command] {
     let root = context.package.directoryURL
     let input = root.appendingPathComponent("VERSION")
-    let script = root.appendingPathComponent("Scripts/generate-version")
+    let script = root.appendingPathComponent("scripts/generate-version")
     let output = context.pluginWorkDirectoryURL.appendingPathComponent("PackageVersion.swift")
     return [
       .buildCommand(

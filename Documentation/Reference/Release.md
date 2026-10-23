@@ -1,6 +1,8 @@
 # Release
 
-Release status: partly manual; validation runs through [Scripts/check](../../Scripts/check).
+Validation runs through the [CI](../../.github/workflows/ci.yml) workflow.
+Pushing a signed version tag starts the [Release](../../.github/workflows/release.yml)
+workflow, which validates the tagged commit and publishes its changelog notes.
 
 Version rules for swift-json-schema, covering tags, release timing, choosing the
 next version and the changelog, are in
@@ -15,7 +17,7 @@ with their targets.
 
 | Shipped component | Version meaning | Version source | Mirrors and derived fields | Update and read-only check |
 | --- | --- | --- | --- | --- |
-| Package products | Products' version | [VERSION](../../VERSION), selected by [.github/release.json](../../.github/release.json) | [CHANGELOG.md](../../CHANGELOG.md) records release notes. | `Scripts/check` checks declarations. |
+| Package products | Products' version | [VERSION](../../VERSION), selected by [.github/release.json](../../.github/release.json) | [CHANGELOG.md](../../CHANGELOG.md) records release notes; [scripts/generate-version](../../scripts/generate-version) supplies the CLI's generated constant. | Shared policy checks declarations; CLI tests check `--version`. |
 
 ## Compatibility Surface
 
@@ -28,47 +30,48 @@ Models bridging, CLI options and outputs, and compiler/platform requirements.
 The package requires Swift 6.2, iOS 18 or macOS 15 and supports Linux.
 The maintained Apple system window covers iOS 18/26/27 and macOS 15/26/27.
 Foundation Models bridging requires iOS 26 or macOS 26 at runtime and a matching SDK.
-CI tests Swift 6.2 on macOS 15 and Linux and Swift 6.3 on macOS 26, with
-strict formatting checked separately. The committed dependency lock selects the
-upper tested SwiftSyntax release. A separate Swift 6.2 lane runs
-`Scripts/check-dependency-minimum swift-syntax`, resolving the manifest's lower
-bound in an archived source tree and running its tests and release build. Both
-lanes record the actual dependency revision; the package supports the manifest's
-602.0.0..<605.0.0 range.
+CI tests Swift 6.2 on macOS 15 and Linux and Swift 6.3 on macOS 26. Each macOS
+compiler also builds the release configuration. Strict formatting and DocC
+builds use the last declared compiler. The SwiftSyntax requirement is
+602.0.0..<605.0.0; [Package.resolved](../../Package.resolved) records the dependency
+versions selected for validation.
 
 ## Derived Metadata and Drift Checks
 
-[.github/release.json](../../.github/release.json) selects validation,
-documentation targets and the pinned Linux compiler image.
+[.github/swift-package.json](../../.github/swift-package.json) selects compilers,
+format paths, the pinned Linux image, DocC targets and repository commands.
+[.github/release.json](../../.github/release.json) declares the repository,
+version source, changelog, minimum Swift version and platform support window.
 
-`Scripts/check` checks declarations, formatting, consumer tooling, Swift tests,
-release builds, CLI behavior, consumer examples and DocC on macOS.
+The required checks are `policy / policy` and `validate / result`. Policy checks
+signatures, commit and pull-request titles, source rules and version declarations.
+Validation aggregates formatting, tests, release builds, Linux tests, DocC,
+Python CLI tests and compliance reports.
 
 ## Candidate, Acceptance and Publication
 
-Run `Scripts/check` and retain native, platform and consumer evidence for the
-accepted source under `.build/release-validation`.
+Run the [local validation commands](../../CONTRIBUTING.md#local-validation) and
+require both CI checks on the accepted commit. The release workflow validates
+the tagged commit again, verifies its signed annotated tag and version
+declaration, then publishes the matching changelog entry as GitHub release notes.
 
-## Evidence Reuse and Invalidation
+## Compliance Reports
 
 Compliance reports use the fixture revision and archive checksum in
 `Tests/Fixtures.lock.json`. The optional draft-04 integer mismatch remains
 visible in those reports.
 
-`Scripts/check` records the commit and tree, OS, Swift toolchain, dependency lock
-digest and pins, validation script and formatting configuration digests, and
-completed checks in `.build/release-validation/provenance.json`. On macOS it also
-records Xcode and SDK versions.
+`swift test --filter OfficialSuite` regenerates per-draft reports in
+`.build/compliance/`.
 
 ## Entry Points and Artifact Retention
 
 | Operation | Existing command or explicit manual procedure | Required access |
 | --- | --- | --- |
-| Version update and check | Not established. | Not established. |
-| Candidate validation and build | `Scripts/check`; `Scripts/check-dependency-minimum swift-syntax` for the minimum dependency lane. | Not established. |
-| Status and interrupted-run recovery | Not established. | Not established. |
-| Acceptance and publication | Run [`Release`](../../.github/workflows/release.yml) with the accepted tag; it validates the tag and publishes the GitHub release. Retain native, platform and consumer evidence for the accepted source under `.build/release-validation`. | Repository write access to run workflows |
-| Cleanup | Not established. | Not established. |
+| Version update and check | Update `VERSION` and `CHANGELOG.md` under VERSIONING; shared policy validates their declarations. | Repository write access |
+| Candidate validation and build | Run the [local validation commands](../../CONTRIBUTING.md#local-validation); CI runs the declared matrix. | Swift, Xcode and Python 3 locally |
+| Status and interrupted-run recovery | Inspect GitHub Actions results; retry a failed release with the same accepted tag. | Repository write access to rerun workflows |
+| Acceptance and publication | Push the signed accepted version tag; [`Release`](../../.github/workflows/release.yml) validates it and publishes its notes. | Tag signing key and repository write access |
+| Cleanup | Remove local `.build/` outputs when no longer needed. | Local filesystem access |
 
-Evidence belongs in `.build/release-validation`; raw compliance reports are
-produced in `.build/compliance`.
+Builds, DocC archives and compliance reports live under ignored `.build/`.

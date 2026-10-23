@@ -128,8 +128,8 @@ the report: this implementation treats `1.0` as a mathematical integer for
 every draft. The fixture expects it not to satisfy `integer` in draft-04.
 Required assertions total **4950 / 4950**; optional format assertions total
 **3241 / 3241**. These results cover the locked fixture revision, not every
-possible schema. `Scripts/check` regenerates per-draft reports under
-`.build/compliance/`.
+possible schema. `swift test --filter OfficialSuite` regenerates per-draft
+reports under `.build/compliance/`.
 
 ## Benchmarks
 

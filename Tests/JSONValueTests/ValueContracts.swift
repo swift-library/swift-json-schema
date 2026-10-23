@@ -45,6 +45,13 @@ import Testing
     #expect(throws: JSONError.self) { try JSONPointer("/bad~2") }
   }
 
+  @Test func pointersAndSerializationPreserveDecimalText() throws {
+    let value = try JSONValue.parse(#"{"amount":12345678901234567890.125,"tags":["swift"]}"#)
+    let amount = try JSONPointer("/amount").resolve(in: value)
+    #expect(amount.numberValue?.text == "12345678901234567890.125")
+    #expect(try value.serialized().contains("12345678901234567890.125"))
+  }
+
   @Test func parserFailureLocatesNestedValue() {
     do {
       _ = try JSONValue.parse("{\n  \"a/b\": [true, nope]\n}")
