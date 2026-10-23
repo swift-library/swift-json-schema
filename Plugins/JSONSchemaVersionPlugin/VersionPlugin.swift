@@ -13,8 +13,8 @@ struct VersionPlugin: BuildToolPlugin {
     let output = context.pluginWorkDirectoryURL.appendingPathComponent("PackageVersion.swift")
     return [
       .buildCommand(
-        displayName: "Generate package version", executable: URL(fileURLWithPath: "/usr/bin/env"),
-        arguments: ["python3", script.path, input.path, output.path], inputFiles: [input, script],
+        displayName: "Generate package version", executable: URL(fileURLWithPath: "/bin/sh"),
+        arguments: [script.path, input.path, output.path], inputFiles: [input, script],
         outputFiles: [output])
     ]
   }
