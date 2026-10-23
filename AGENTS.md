@@ -60,8 +60,11 @@ points.
 - `.github/swift-package.json` owns shared CI validation options and repository
   commands; `.github/release.json` owns release declarations. Required checks
   are `policy / policy` and `validate / result`.
+- Shared Apple CI uses one compiler entry for Xcode 26.6 on macOS 26. The
+  package requires Swift 6.3 and targets iOS 18 and macOS 15 or later, including
+  its command-line product.
 - Validate locally with `swift build`, `swift test`, `swift build -c release`,
-  strict `xcrun swift-format lint` over the configured format paths, and every
+  strict `swift format lint` over the configured format paths, and every
   configured repository command. See `CONTRIBUTING.md` for the commands.
 - Keep repository automation in lowercase `scripts/`. The version build plugin
   uses `scripts/generate-version`.
@@ -87,8 +90,9 @@ points.
 - Flag a change to the compatibility surface recorded in
   `Documentation/Reference/Release.md`, such as public API, observable
   behavior or a raised minimum platform or Swift version, without the
-  changelog entry and version bump VERSIONING requires. Safe path: record the
-  change under the next version with that bump.
+  changelog entry VERSIONING requires. Record breaking changes under
+  `Unreleased` with a **Breaking** marker and the new requirements; assign the
+  version and bump at release.
 
 ### Claims
 

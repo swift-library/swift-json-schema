@@ -27,13 +27,14 @@ Models bridging, CLI options and outputs, and compiler/platform requirements.
 
 ## Dependencies and Verified Combinations
 
-The package requires Swift 6.2, iOS 18 or macOS 15 and supports Linux.
+The package requires Swift 6.3, iOS 18 or macOS 15 and supports Linux.
 The maintained Apple system window covers iOS 18/26/27 and macOS 15/26/27.
 Foundation Models bridging requires iOS 26 or macOS 26 at runtime and a matching SDK.
-CI tests Swift 6.2 on macOS 15 and Linux and Swift 6.3 on macOS 26. Each macOS
-compiler also builds the release configuration. Strict formatting and DocC
-builds use the last declared compiler. The SwiftSyntax requirement is
-602.0.0..<605.0.0; [Package.resolved](../../Package.resolved) records the dependency
+Shared Apple CI compiles and tests with Xcode 26.6 (Swift 6.3) on macOS 26
+through one compiler entry. Release builds, strict formatting and DocC builds
+use that compiler. The latest SDK checks API availability for the declared
+deployment floors; the command-line product follows the same floors.
+The SwiftSyntax requirement is 602.0.0..<605.0.0; [Package.resolved](../../Package.resolved) records the dependency
 versions selected for validation.
 
 ## Derived Metadata and Drift Checks
