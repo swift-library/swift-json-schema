@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Breaking**: Require Swift 6.3 or later. The package and its command-line product require iOS 18 or macOS 15; shared Apple CI uses Xcode 26.6.
+
 ## 0.1.1
 
 - Allow SwiftSyntax 602, 603 and 604 without raising the Swift compiler minimum.

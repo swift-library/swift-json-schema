@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://github.com/swift-library/swift-json-schema/actions/workflows/ci.yml"><img src="https://github.com/swift-library/swift-json-schema/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI"></a>
-  <img src="https://img.shields.io/badge/Swift-6.2%2B-F05138?style=flat" alt="Swift 6.2+">
+  <img src="https://img.shields.io/badge/Swift-6.3%2B-F05138?style=flat" alt="Swift 6.3+">
   <img src="https://img.shields.io/badge/platforms-iOS%2018%2B%20%7C%20macOS%2015%2B%20%7C%20Linux-lightgrey?style=flat" alt="Platforms: iOS 18+ | macOS 15+ | Linux">
   <a href="LICENSE.txt"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat" alt="License: Apache-2.0 WITH Swift-exception"></a>
 </p>
@@ -82,7 +82,7 @@ Choose the JSON value, schema validation, builder, conversion, or Foundation Mod
 
 ## Requirements
 
-- Swift 6.2 or later, using Swift 6 language mode.
+- Swift 6.3 or later, using Swift 6 language mode. Shared Apple CI uses Xcode 26.6 on macOS 26.
 - iOS 18+ or macOS 15+. CI also configures Linux builds and tests.
 - Foundation Models bridging requires iOS 26+ or macOS 26+ and an SDK that
   provides Foundation Models. It accepts a representable subset and throws

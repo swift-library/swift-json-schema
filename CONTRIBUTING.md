@@ -12,13 +12,17 @@ when changing compatibility, requirements or release inputs.
 
 ## Local validation
 
+Use Swift 6.3 or later. Shared Apple CI compiles and tests with Xcode 26.6
+on macOS 26. The package and its command-line product target iOS 18 and macOS 15
+or later; the latest SDK checks availability for those deployment floors.
+
 Run these checks before opening a pull request:
 
 ```sh
 swift build
 swift test
 swift build -c release
-xcrun swift-format lint --strict --configuration .swift-format --recursive \
+swift format lint --strict --configuration .swift-format --recursive \
   Package.swift Sources Tests Plugins Benchmarks/Package.swift Benchmarks/Sources
 JSON_SCHEMA_CLI="$(swift build -c release --show-bin-path)/json-schema" \
   python3 -B -m unittest discover -s Tests/CLITests
