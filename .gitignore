@@ -11,3 +11,7 @@ DerivedData/
 /Benchmarks/.build
 /Benchmarks/.swiftpm
 /build
+/.agent/*
+!/.agent/instructions/
+!/.agent/agents.json
+!/.agent/agents.resolved
